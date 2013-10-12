@@ -1,4 +1,4 @@
-from PyQt4.QtCore import QObject, pyqtSlot, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from pybtex.database import BibliographyData
 from pybtex.database.input import bibtex
 #from pybtex.database.output.bibtex import Writer

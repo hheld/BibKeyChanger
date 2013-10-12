@@ -1,6 +1,6 @@
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtGui import QMainWindow, QFileDialog, QStringListModel
+from PyQt5 import uic
+from PyQt5.QtCore import pyqtSlot, QStringListModel
+from PyQt5.QtWidgets import QMainWindow, QFileDialog
 import io
 from pybtex.database import BibliographyData
 from BibTexUtils import BibTexReader
@@ -24,10 +24,9 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def onActionOpenFile(self):
-        selectedFile = QFileDialog.getOpenFileName(self, 'Open BibTex file', '', 'BibTex files (*.bib)')
+        selectedFile, filter = QFileDialog.getOpenFileName(self, 'Open BibTex file', '', 'BibTex files (*.bib)')
 
         if selectedFile:
-            print('You selected file \'%s\'.' % selectedFile)
             self._bibReader = BibTexReader(self, selectedFile)
 
             self._bibReader.bibdataAvailable.connect(self.onBibDataAvailable)
