@@ -1,9 +1,10 @@
-from BibTexUtils import BibTexReader
+from PyQt4.QtGui import QApplication
+import sys
+from UI.MainWindow import MainWindow
 
-reader = BibTexReader(None, '/home/harry/Documents/Articles/library.bib')
+app = QApplication(sys.argv)
 
-reader.read()
-print(reader.bibdata)
-print(reader.fields)
-print(reader.persons)
-print(reader.bibtexfile)
+mw = MainWindow()
+mw.show()
+
+sys.exit(app.exec_())
