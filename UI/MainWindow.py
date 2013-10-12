@@ -12,6 +12,7 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self)
 
         self._bibReader = None
+        self._keyFields = []
 
         self.ui = uic.loadUi('UI/MainWindow.ui', self)
         self.ui.actionOpen.triggered.connect(self.onActionOpenFile)
@@ -20,9 +21,7 @@ class MainWindow(QMainWindow):
         self.ui.lv_fields.setModel(self._modelFields)
         self.ui.lv_fields.selectedIndicesChanged.connect(self.onFieldSelectionChanged)
 
-        self._modelPersons = QStringListModel()
-        self.ui.lv_persons.setModel(self._modelPersons)
-        self.ui.lv_persons.selectedIndicesChanged.connect(self.onPersonSelectionChanged)
+        self.ui.pb_clearSelection.clicked.connect(self.onButtonClearSelectionClicked)
 
     @pyqtSlot()
     def onActionOpenFile(self):
@@ -46,16 +45,25 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(set)
     def onFieldDataAvailable(self, fieldData):
-        self._modelFields.setStringList([fd for fd in fieldData])
+        existingList = self._modelFields.stringList()
+
+        existingList.extend([fd for fd in fieldData])
+
+        self._modelFields.setStringList(existingList)
 
     @pyqtSlot(set)
     def onPersonDataAvailable(self, personData):
-        self._modelPersons.setStringList([pd for pd in personData])
+        existingList = self._modelFields.stringList()
+
+        existingList.extend([pd for pd in personData])
+
+        self._modelFields.setStringList(existingList)
 
     @pyqtSlot(list)
     def onFieldSelectionChanged(self, listOfFields):
-        print(listOfFields)
+        self._keyFields = listOfFields
+        self.ui.le_keyPattern.setText('---'.join(self._keyFields))
 
-    @pyqtSlot(list)
-    def onPersonSelectionChanged(self, listOfFields):
-        print(listOfFields)
+    @pyqtSlot()
+    def onButtonClearSelectionClicked(self):
+        self.ui.lv_fields.clearSelection()
