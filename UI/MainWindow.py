@@ -18,9 +18,11 @@ class MainWindow(QMainWindow):
 
         self._modelFields = QStringListModel()
         self.ui.lv_fields.setModel(self._modelFields)
+        self.ui.lv_fields.selectedIndicesChanged.connect(self.onFieldSelectionChanged)
 
         self._modelPersons = QStringListModel()
         self.ui.lv_persons.setModel(self._modelPersons)
+        self.ui.lv_persons.selectedIndicesChanged.connect(self.onPersonSelectionChanged)
 
     @pyqtSlot()
     def onActionOpenFile(self):
@@ -49,3 +51,11 @@ class MainWindow(QMainWindow):
     @pyqtSlot(set)
     def onPersonDataAvailable(self, personData):
         self._modelPersons.setStringList([pd for pd in personData])
+
+    @pyqtSlot(list)
+    def onFieldSelectionChanged(self, listOfFields):
+        print(listOfFields)
+
+    @pyqtSlot(list)
+    def onPersonSelectionChanged(self, listOfFields):
+        print(listOfFields)
