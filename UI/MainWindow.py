@@ -1,13 +1,26 @@
 from PyQt4 import uic
-from PyQt4.QtCore import pyqtSlot, QUrl
-from PyQt4.QtGui import QMainWindow, QFileDialog
+from PyQt4.QtCore import pyqtSlot
+from PyQt4.QtGui import QMainWindow, QFileDialog, QStringListModel
+import io
+from pybtex.database import BibliographyData
+from BibTexUtils import BibTexReader
+from pybtex.database.output.bibtex import Writer
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
+
+        self._bibReader = None
+
         self.ui = uic.loadUi('UI/MainWindow.ui', self)
         self.ui.actionOpen.triggered.connect(self.onActionOpenFile)
+
+        self._modelFields = QStringListModel()
+        self.ui.lv_fields.setModel(self._modelFields)
+
+        self._modelPersons = QStringListModel()
+        self.ui.lv_persons.setModel(self._modelPersons)
 
     @pyqtSlot()
     def onActionOpenFile(self):
@@ -15,13 +28,25 @@ class MainWindow(QMainWindow):
 
         if selectedFile:
             print('You selected file \'%s\'.' % selectedFile)
+            self._bibReader = BibTexReader(self, selectedFile)
 
-#from BibTexUtils import BibTexReader
+            self._bibReader.bibdataAvailable.connect(self.onBibDataAvailable)
+            self._bibReader.fieldsAvailable.connect(self.onFieldDataAvailable)
+            self._bibReader.personsAvailable.connect(self.onPersonDataAvailable)
 
-#reader = BibTexReader(None, '/home/harry/Documents/Articles/library.bib')
+            self._bibReader.read()
 
-#reader.read()
-#print(reader.bibdata)
-#print(reader.fields)
-#print(reader.persons)
-#print(reader.bibtexfile)
+    @pyqtSlot(BibliographyData)
+    def onBibDataAvailable(self, bibdata):
+        writer = Writer()
+        bibdata_str = io.StringIO()
+        writer.write_stream(bibdata, bibdata_str)
+        self.ui.tb_preview.setText(bibdata_str.getvalue())
+
+    @pyqtSlot(set)
+    def onFieldDataAvailable(self, fieldData):
+        self._modelFields.setStringList([fd for fd in fieldData])
+
+    @pyqtSlot(set)
+    def onPersonDataAvailable(self, personData):
+        self._modelPersons.setStringList([pd for pd in personData])
