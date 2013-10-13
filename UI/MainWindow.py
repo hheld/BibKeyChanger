@@ -16,6 +16,7 @@ class MainWindow(QMainWindow):
 
         self.ui = uic.loadUi('UI/MainWindow.ui', self)
         self.ui.actionOpen.triggered.connect(self.onActionOpenFile)
+        self.ui.actionSave_as.triggered.connect(self.onActionSaveAs)
 
         self._modelFields = QStringListModel()
         self.ui.lv_fields.setModel(self._modelFields)
@@ -43,7 +44,7 @@ class MainWindow(QMainWindow):
             writer = Writer()
             bibdata_str = io.StringIO()
             writer.write_stream(bibdata, bibdata_str)
-            self.ui.tb_preview.setText(bibdata_str.getvalue())
+            self.ui.tb_preview.setPlainText(bibdata_str.getvalue())
 
     @pyqtSlot(set)
     def onFieldDataAvailable(self, fieldData):
@@ -77,3 +78,13 @@ class MainWindow(QMainWindow):
     def onButtonPreviewClicked(self):
         if self._bibReader:
             self.onBibDataAvailable(self._bibReader.modifiedKeys(self.ui.le_keyPattern.text().split('---')))
+
+    @pyqtSlot()
+    def onActionSaveAs(self):
+        if self._bibReader:
+            saveFileName, filter = QFileDialog.getSaveFileName(self, 'Save BibTex file', self._bibReader.bibtexfile,
+                                                               'BibTex files (*.bib)')
+
+            if saveFileName:
+                with open(saveFileName, 'w') as f:
+                    f.write(self.ui.tb_preview.toPlainText())

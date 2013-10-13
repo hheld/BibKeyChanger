@@ -57,7 +57,7 @@ class BibTexReader(QObject):
 
     @staticmethod
     def _cleanLaTeXFromKey(key):
-        key = re.sub(r'[\\\{\}()"]', '', key)
+        key = re.sub(r'[\\\{\}()"\']', '', key)
         key = re.sub(r'[: _]', '-', key)
         return key
 
