@@ -1,7 +1,7 @@
+import re
 from PyQt5.QtCore import QObject, pyqtSlot, pyqtSignal
 from pybtex.database import BibliographyData
 from pybtex.database.input import bibtex
-#from pybtex.database.output.bibtex import Writer
 
 class BibTexReader(QObject):
     bibdataAvailable = pyqtSignal(BibliographyData)
@@ -30,6 +30,36 @@ class BibTexReader(QObject):
         self.bibdataAvailable.emit(self._bibdata)
         self.fieldsAvailable.emit(self._availableFields)
         self.personsAvailable.emit(self._availablePersons)
+
+    def modifiedKeys(self, keyPattern):
+        newBib = BibliographyData()
+
+        for bib_id in self._bibdata.entries:
+            persons = self._bibdata.entries[bib_id].persons
+            fields = self._bibdata.entries[bib_id].fields
+
+            new_bib_id = ''
+
+            for kp in keyPattern:
+                if kp:
+                    if kp in persons.keys():
+                        new_bib_id += ''.join(a.last()[0] for a in persons[kp])
+                    elif kp in fields.keys():
+                        new_bib_id += ''.join(a for a in fields[kp])
+
+            if new_bib_id:
+                new_bib_id = self._cleanLaTeXFromKey(new_bib_id)
+                newBib.entries[new_bib_id] = self._bibdata.entries[bib_id]
+            else:
+                newBib.entries[bib_id] = self._bibdata.entries[bib_id]
+
+        return newBib
+
+    @staticmethod
+    def _cleanLaTeXFromKey(key):
+        key = re.sub(r'[\\\{\}()"]', '', key)
+        key = re.sub(r'[: _]', '-', key)
+        return key
 
     @property
     def bibdata(self):

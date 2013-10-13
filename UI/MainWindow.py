@@ -22,6 +22,7 @@ class MainWindow(QMainWindow):
         self.ui.lv_fields.selectedIndicesChanged.connect(self.onFieldSelectionChanged)
 
         self.ui.pb_clearSelection.clicked.connect(self.onButtonClearSelectionClicked)
+        self.ui.pb_preview.clicked.connect(self.onButtonPreviewClicked)
 
     @pyqtSlot()
     def onActionOpenFile(self):
@@ -38,10 +39,11 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot(BibliographyData)
     def onBibDataAvailable(self, bibdata):
-        writer = Writer()
-        bibdata_str = io.StringIO()
-        writer.write_stream(bibdata, bibdata_str)
-        self.ui.tb_preview.setText(bibdata_str.getvalue())
+        if bibdata:
+            writer = Writer()
+            bibdata_str = io.StringIO()
+            writer.write_stream(bibdata, bibdata_str)
+            self.ui.tb_preview.setText(bibdata_str.getvalue())
 
     @pyqtSlot(set)
     def onFieldDataAvailable(self, fieldData):
@@ -67,3 +69,11 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def onButtonClearSelectionClicked(self):
         self.ui.lv_fields.clearSelection()
+
+        if self._bibReader:
+            self.onBibDataAvailable(self._bibReader.bibdata)
+
+    @pyqtSlot()
+    def onButtonPreviewClicked(self):
+        if self._bibReader:
+            self.onBibDataAvailable(self._bibReader.modifiedKeys(self.ui.le_keyPattern.text().split('---')))
